@@ -87,15 +87,6 @@ export const SecureLoginPortal: React.FC = () => {
     }, 400);
   };
 
-  const handleSimulateFido2 = () => {
-    setMfaCode('123456');
-    setIsSubmitting(true);
-    setTimeout(async () => {
-      await login(identifier, password, '123456');
-      setIsSubmitting(false);
-    }, 500);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#071527] via-[#0B1F3A] to-[#0A2540] flex flex-col justify-center items-center p-4 sm:p-6 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 relative overflow-hidden">
       {/* Background Decorative Ambient Glows */}
@@ -266,9 +257,6 @@ export const SecureLoginPortal: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
                   Kode Verifikasi 6-Digit (TOTP / FIDO2)
                 </label>
-                <span className="text-[11px] text-cyan-400 font-mono">
-                  Kode Tes Demo: 123456
-                </span>
               </div>
 
               <div className="relative">
@@ -280,7 +268,7 @@ export const SecureLoginPortal: React.FC = () => {
                   maxLength={6}
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="123456"
+                  placeholder="••••••"
                   autoFocus
                   required
                   className="w-full bg-slate-950/70 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-center text-lg tracking-widest font-mono font-bold text-white placeholder-slate-600 focus:outline-none focus:border-[#00A9CE] focus:ring-2 focus:ring-[#00A9CE]/20 transition-all"
@@ -290,19 +278,6 @@ export const SecureLoginPortal: React.FC = () => {
                 Buka aplikasi Authenticator Anda (Google Authenticator, Microsoft Authenticator) atau masukkan kode 6-digit di atas.
               </p>
             </div>
-
-            {/* Hardware FIDO2 1-Click Simulation Button */}
-            {targetUserMfaType.includes('FIDO2') && (
-              <button
-                type="button"
-                onClick={handleSimulateFido2}
-                disabled={isSubmitting}
-                className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-cyan-500/40 text-cyan-300 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
-              >
-                <Fingerprint className="w-4 h-4 text-cyan-400" />
-                <span>Simulasikan Sentuhan Kunci Hardware FIDO2 (WebAuthn)</span>
-              </button>
-            )}
 
             {/* MFA Submit Button */}
             <button

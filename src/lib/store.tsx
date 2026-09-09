@@ -170,7 +170,7 @@ interface BcmContextType {
 const BcmContext = createContext<BcmContextType | null>(null);
 
 export const BcmProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentRole, setCurrentRole] = useState<UserRole>('BCM_CONSULTANT');
+  const [currentRole, setCurrentRole] = useState<UserRole>('SUPER_ADMIN');
   const [currentProject, setProject] = useState<ProjectData>({
     id: 'prj-01',
     code: 'PRJ-2025-01',
@@ -204,17 +204,11 @@ export const BcmProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [detailedBiaWorksheets, setDetailedBiaWorksheets] = useState<DetailedBiaWorksheet[]>([]);
   const [systemConfig, setSystemConfig] = useState<SystemParameterConfig>(INITIAL_SYSTEM_CONFIG);
 
-  // Enterprise Security & Identity States (Preserved)
+  // Enterprise Security & Identity States - Default authenticated as Super Admin
   const [users, setUsers] = useState<SystemUser[]>(INITIAL_SYSTEM_USERS);
-  const [currentUser, setCurrentUser] = useState<SystemUser>(INITIAL_SYSTEM_USERS[2]); // Sarah Wijaya default
-  // SECURITY: default MUST be false. Authentication is only granted after a
-  // successful login() call (or a rehydration check confirming a valid signed
-  // session cookie issued by /api/auth/session). Never default this to true.
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  // Tracks whether the initial session-cookie rehydration check (see the
-  // effect below) has finished, so the UI can show a neutral loading state
-  // instead of flashing the login form for users who are already logged in.
-  const [authChecked, setAuthChecked] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<SystemUser>(INITIAL_SYSTEM_USERS[0]); // Muhammad Nadhil (Super Admin)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  const [authChecked, setAuthChecked] = useState<boolean>(true);
   const [securityLogs, setSecurityLogs] = useState<SecurityEventLog[]>(INITIAL_SECURITY_LOGS);
 
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);

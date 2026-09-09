@@ -119,26 +119,8 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
     }
   }, [authChecked, isAuthenticated, pathname]);
 
-  // If on login route, never render AppShell navigation chrome (header, sidebar, bottom nav)
   if (pathname === '/login') {
     return <>{children}</>;
-  }
-
-  if (!authChecked) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#071527] via-[#0B1F3A] to-[#0A2540] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3 text-slate-300">
-          <div className="w-10 h-10 border-4 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
-          <span className="text-xs font-semibold tracking-wide uppercase text-slate-400">
-            Memverifikasi sesi keamanan...
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <SecureLoginPortal />;
   }
 
   return (

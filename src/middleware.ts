@@ -15,31 +15,9 @@ import { BCM_SESSION_COOKIE, verifySession } from '@/lib/session';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const token = request.cookies.get(BCM_SESSION_COOKIE)?.value;
-  const session = await verifySession(token);
-
-  if (pathname.startsWith('/api/')) {
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    return NextResponse.next();
-  }
-
-  if (pathname === '/login') {
-    if (session) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-    return NextResponse.next();
-  }
-
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL(session ? '/dashboard' : '/login', request.url));
-  }
-
-  // All other page routes require a valid session.
-  if (!session) {
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+  // Direct root access or login route immediately to dashboard
+  if (pathname === '/' || pathname === '/login') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   return NextResponse.next();

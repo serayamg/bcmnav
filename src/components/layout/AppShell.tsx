@@ -112,6 +112,18 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
   const currentRoleInfo = ROLE_DEFINITIONS.find((r) => r.role === currentRole) || ROLE_DEFINITIONS[2];
 
+  // Redirect to dashboard if authenticated and on /login
+  useEffect(() => {
+    if (authChecked && isAuthenticated && pathname === '/login') {
+      window.location.href = '/dashboard';
+    }
+  }, [authChecked, isAuthenticated, pathname]);
+
+  // If on login route, never render AppShell navigation chrome (header, sidebar, bottom nav)
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
+
   if (!authChecked) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#071527] via-[#0B1F3A] to-[#0A2540] flex items-center justify-center">

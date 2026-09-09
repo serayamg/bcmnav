@@ -50,21 +50,29 @@ export const SecureLoginPortal: React.FC = () => {
 
     setIsSubmitting(true);
     setTimeout(async () => {
-      const res = await login(identifier, password);
-      setIsSubmitting(false);
+      try {
+        const res = await login(identifier, password);
 
-      if (res.requiresMfa) {
-        setStep('MFA_CHALLENGE');
-        setTargetUserMfaType(res.mfaType || 'TOTP Authenticator');
-        setTargetUserEmail(res.user?.email || identifier);
-        setErrorMessage(null);
-      } else if (!res.success) {
-        setErrorMessage(res.error || 'Autentikasi gagal.');
-        if (res.remainingAttempts !== undefined) {
-          setRemainingAttempts(res.remainingAttempts);
+        if (res.requiresMfa) {
+          setIsSubmitting(false);
+          setStep('MFA_CHALLENGE');
+          setTargetUserMfaType(res.mfaType || 'TOTP Authenticator');
+          setTargetUserEmail(res.user?.email || identifier);
+          setErrorMessage(null);
+        } else if (res.success) {
+          window.location.href = '/dashboard';
+        } else {
+          setIsSubmitting(false);
+          setErrorMessage(res.error || 'Autentikasi gagal.');
+          if (res.remainingAttempts !== undefined) {
+            setRemainingAttempts(res.remainingAttempts);
+          }
         }
+      } catch (err: any) {
+        setIsSubmitting(false);
+        setErrorMessage(err?.message || 'Terjadi kesalahan sistem saat menghubungi server autentikasi.');
       }
-    }, 450);
+    }, 350);
   };
 
   const handleMfaSubmit = (e: React.FormEvent) => {
@@ -78,13 +86,20 @@ export const SecureLoginPortal: React.FC = () => {
 
     setIsSubmitting(true);
     setTimeout(async () => {
-      const res = await login(identifier, password, mfaCode);
-      setIsSubmitting(false);
+      try {
+        const res = await login(identifier, password, mfaCode);
 
-      if (!res.success) {
-        setErrorMessage(res.error || 'Verifikasi MFA gagal.');
+        if (!res.success) {
+          setIsSubmitting(false);
+          setErrorMessage(res.error || 'Verifikasi MFA gagal.');
+        } else {
+          window.location.href = '/dashboard';
+        }
+      } catch (err: any) {
+        setIsSubmitting(false);
+        setErrorMessage(err?.message || 'Terjadi kesalahan sistem saat memverifikasi token MFA.');
       }
-    }, 400);
+    }, 350);
   };
 
   return (
@@ -221,6 +236,46 @@ export const SecureLoginPortal: React.FC = () => {
                 </>
               )}
             </button>
+
+            {/* Quick Demo Credentials */}
+            <div className="pt-3 border-t border-slate-800/80">
+              <div className="text-[11px] text-slate-400 mb-2 font-medium flex items-center justify-between">
+                <span>Pilihan Akun Demo (Klik untuk auto-fill):</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIdentifier('admin.security@jma-advisory.id');
+                    setPassword('BCM@SECURE2025!');
+                    setErrorMessage(null);
+                  }}
+                  className="text-left p-2 rounded-xl bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 hover:border-cyan-500/40 text-xs transition-all cursor-pointer"
+                >
+                  <div className="font-bold text-cyan-300 flex items-center gap-1">
+                    <Shield className="w-3 h-3 text-cyan-400 shrink-0" />
+                    <span>Super Admin</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 truncate mt-0.5">admin.security@jma-advisory.id</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIdentifier('sarah.wijaya@jma-advisory.id');
+                    setPassword('BCM@SECURE2025!');
+                    setErrorMessage(null);
+                  }}
+                  className="text-left p-2 rounded-xl bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 hover:border-cyan-500/40 text-xs transition-all cursor-pointer"
+                >
+                  <div className="font-bold text-cyan-300 flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-cyan-400 shrink-0" />
+                    <span>Lead Consultant</span>
+                  </div>
+                  <div className="text-[10px] text-slate-400 truncate mt-0.5">sarah.wijaya@jma-advisory.id</div>
+                </button>
+              </div>
+            </div>
           </form>
         )}
 
@@ -268,15 +323,28 @@ export const SecureLoginPortal: React.FC = () => {
                   maxLength={6}
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="••••••"
+                  placeholder="123456"
                   autoFocus
                   required
                   className="w-full bg-slate-950/70 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-center text-lg tracking-widest font-mono font-bold text-white placeholder-slate-600 focus:outline-none focus:border-[#00A9CE] focus:ring-2 focus:ring-[#00A9CE]/20 transition-all"
                 />
               </div>
-              <p className="text-[11px] text-slate-400 mt-2 leading-relaxed">
-                Buka aplikasi Authenticator Anda (Google Authenticator, Microsoft Authenticator) atau masukkan kode 6-digit di atas.
-              </p>
+
+              <div className="flex items-center justify-between gap-2 mt-2">
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  Masukkan kode 6-digit Authenticator atau klik tombol di bawah:
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setMfaCode('123456')}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 font-mono font-bold transition-all cursor-pointer"
+                >
+                  ⚡ Gunakan Kode Token: 123456
+                </button>
+              </div>
             </div>
 
             {/* MFA Submit Button */}

@@ -1,0 +1,16 @@
+{
+  "name": "BCM Navigator — Advisory & BIA Management System",
+  "short_name": "BCM Navigator",
+  "description": "Enterprise ISO 22301 Business Continuity & BIA Consulting Platform",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0B1F3A",
+  "theme_color": "#0B1F3A",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

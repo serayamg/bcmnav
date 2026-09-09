@@ -1,0 +1,16 @@
+services:
+  bcm-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bcm-system
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=file:./bcm_navigator.db
+    volumes:
+      # Persistent storage agar database SQLite aman dan tidak hilang saat restart
+      - ./prisma:/app/prisma

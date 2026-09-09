@@ -1,0 +1,483 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./bcm_navigator.db"
+}
+
+model Client {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  industry    String
+  country     String    @default("Indonesia")
+  address     String?
+  logoUrl     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  projects    Project[]
+}
+
+model Project {
+  id                  String               @id @default(cuid())
+  code                String               @unique
+  name                String
+  clientId            String
+  client              Client               @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  framework           String               @default("ISO 22301 & ISO 22317")
+  sponsorName         String?
+  bcmCoordinatorName  String?
+  consultingPmName    String?
+  startDate           DateTime             @default(now())
+  targetDate          DateTime?
+  status              String               @default("Active")
+  scopeDescription    String?
+  location            String?              @default("Head Office & DC")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  
+  units               OrganizationUnit[]
+  documents           DocumentRequest[]
+  stakeholders        Stakeholder[]
+  processes           BusinessProcess[]
+  applications        Application[]
+  vendors             Vendor[]
+  biaAssessments      BiaAssessment[]
+  issues              Issue[]
+  workshops           ValidationWorkshop[]
+  auditLogs           AuditLog[]
+  parameters          ProjectParameter[]
+  riskAssessments     RiskAssessment[]
+  bcpActivations      BcpActivation[]
+}
+
+model OrganizationLevel {
+  id        String   @id @default(cuid())
+  level     Int
+  name      String
+  order     Int
+}
+
+model OrganizationUnit {
+  id              String             @id @default(cuid())
+  code            String
+  name            String
+  level           Int
+  parentId        String?
+  parent          OrganizationUnit?  @relation("UnitHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children        OrganizationUnit[] @relation("UnitHierarchy")
+  projectId       String
+  project         Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unitHeadName    String?
+  bcmCoordName    String?
+  location        String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  stakeholders    Stakeholder[]
+  processes       BusinessProcess[]
+  documentRequests DocumentRequest[]
+  issues          Issue[]
+}
+
+model User {
+  id          String        @id @default(cuid())
+  email       String        @unique
+  name        String
+  role        String        @default("CONSULTANT")
+  avatarUrl   String?
+  title       String?
+  phone       String?
+  status      String        @default("Active")
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  auditLogs   AuditLog[]
+  comments    Comment[]
+}
+
+model DocumentRequest {
+  id                  String             @id @default(cuid())
+  code                String
+  projectId           String
+  project             Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unitId              String?
+  unit                OrganizationUnit?  @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  category            String
+  name                String
+  description         String?
+  mandatory           Boolean            @default(true)
+  confidentiality     String             @default("Confidential")
+  priority            String             @default("High")
+  status              String             @default("Requested")
+  targetDate          DateTime?
+  uploadedFileName    String?
+  uploadedFileUrl     String?
+  uploadedFileSize    String?
+  uploadedAt          DateTime?
+  version             String             @default("1.0")
+  
+  reviewStatus        String?
+  completeness        Int?
+  relevance           String?
+  keyFindings         String?
+  gapIdentified       String?
+  followUpRequired    String?
+  reviewerName        String?
+  reviewedAt          DateTime?
+  
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  reviews             DocumentReview[]
+}
+
+model DocumentReview {
+  id                  String             @id @default(cuid())
+  documentRequestId   String
+  documentRequest     DocumentRequest    @relation(fields: [documentRequestId], references: [id], onDelete: Cascade)
+  version             String             @default("1.0")
+  reviewerName        String
+  status              String
+  completeness        Int                @default(100)
+  keyFindings         String?
+  gapIdentified       String?
+  followUp            String?
+  createdAt           DateTime           @default(now())
+}
+
+model Stakeholder {
+  id                  String             @id @default(cuid())
+  code                String
+  projectId           String
+  project             Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unitId              String?
+  unit                OrganizationUnit?  @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  name                String
+  position            String
+  email               String?
+  phone               String?
+  isInternal          Boolean            @default(true)
+  bcmRole             String
+  influenceLevel      Int                @default(3)
+  interestLevel       Int                @default(3)
+  criticality         String             @default("High")
+  decisionAuthority   String?
+  recommendedBiaRole  Boolean            @default(false)
+  notes               String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  ownedProcesses      BusinessProcess[]
+}
+
+model BusinessProcess {
+  id                  String             @id @default(cuid())
+  code                String
+  projectId           String
+  project             Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unitId              String
+  unit                OrganizationUnit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  name                String
+  level               Int                @default(2)
+  parentId            String?
+  parent              BusinessProcess?   @relation("ProcessHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children            BusinessProcess[]  @relation("ProcessHierarchy")
+  
+  processOwnerId      String?
+  processOwner        Stakeholder?       @relation(fields: [processOwnerId], references: [id], onDelete: SetNull)
+  
+  description         String?
+  objective           String?
+  productService      String?
+  customers           String?
+  inputs              String?
+  keyActivities       String?
+  outputs             String?
+  
+  frequency           String?            @default("Daily / Continuous")
+  operatingHours      String?            @default("24/7" )
+  peakPeriod          String?
+  transactionVolume   String?
+  financialValue      String?
+  slaRequirement      String?
+  regulatoryReq       String?
+  manualWorkaround    String?
+  existingBcp         String?            @default("Partial / Draft")
+  
+  status              String             @default("Identified")
+  isCriticalFlag      Boolean            @default(false)
+
+  rto                 String?
+  rpo                 String?
+  mtpd                String?
+  criticalityTier     String?
+  spofFlag            Boolean            @default(false)
+
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  dependencies        ProcessDependency[]
+  biaAssessments      BiaAssessment[]
+  issues              Issue[]
+}
+
+model Application {
+  id              String             @id @default(cuid())
+  code            String
+  projectId       String
+  project         Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name            String
+  vendor          String?
+  type            String?            @default("Core System")
+  rtoTarget       String?            @default("2 Hours")
+  rpoTarget       String?            @default("15 Minutes")
+  isCloud         Boolean            @default(false)
+  spofRisk        Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  dependencies    ProcessDependency[]
+}
+
+model Vendor {
+  id              String             @id @default(cuid())
+  code            String
+  projectId       String
+  project         Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name            String
+  service         String
+  contactPerson   String?
+  sla             String?
+  alternative     String?
+  isCritical      Boolean            @default(false)
+  spofRisk        Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  dependencies    ProcessDependency[]
+}
+
+model ProcessDependency {
+  id              String          @id @default(cuid())
+  processId       String
+  process         BusinessProcess @relation(fields: [processId], references: [id], onDelete: Cascade)
+  dependencyType  String
+  targetName      String
+  applicationId   String?
+  application     Application?    @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  vendorId        String?
+  vendor          Vendor?         @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  criticality     String          @default("High")
+  requiredRto     String?         @default("2 Hours")
+  hasAlternative  Boolean         @default(false)
+  isSpof          Boolean         @default(false)
+  notes           String?
+  createdAt       DateTime        @default(now())
+}
+
+model BiaAssessment {
+  id                  String             @id @default(cuid())
+  code                String
+  projectId           String
+  project             Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  processId           String
+  process             BusinessProcess    @relation(fields: [processId], references: [id], onDelete: Cascade)
+  version             String             @default("v1.0")
+  status              String             @default("Draft")
+  
+  normalCapacity      String?
+  minimumCapacity     String?
+  peakPeriodDetails   String?
+  
+  suggestedMtpd       String?            @default("8 Hours")
+  approvedMtpd        String?            @default("8 Hours")
+  targetRto           String?            @default("4 Hours")
+  targetRpo           String?            @default("1 Hour")
+  
+  criticalityScore    Float              @default(85.0)
+  criticalityTier     String             @default("Tier 1 — Mission Critical")
+  recoveryPriority    String             @default("P1")
+  
+  spofDetected        Boolean            @default(false)
+  spofReasons         String?
+  completenessScore   Int                @default(85)
+  
+  workaroundStrategy  String?
+  evidenceNotes       String?
+  consultantNotes     String?
+  
+  submittedBy         String?
+  submittedAt         DateTime?
+  reviewedBy          String?
+  reviewedAt          DateTime?
+  approvedBy          String?
+  approvedAt          DateTime?
+  
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  impactScores        BiaImpactScore[]
+  resourceRequirements ResourceRequirement[]
+  approvalHistories   ApprovalHistory[]
+}
+
+model BiaImpactScore {
+  id                  String         @id @default(cuid())
+  biaAssessmentId     String
+  biaAssessment       BiaAssessment  @relation(fields: [biaAssessmentId], references: [id], onDelete: Cascade)
+  category            String
+  timeframe           String
+  severityScore       Int            @default(1)
+  rationale           String?
+}
+
+model ResourceRequirement {
+  id                  String         @id @default(cuid())
+  biaAssessmentId     String
+  biaAssessment       BiaAssessment  @relation(fields: [biaAssessmentId], references: [id], onDelete: Cascade)
+  timeHorizon         String
+  minimumStaff        Int            @default(2)
+  applications        String?
+  workstations        Int            @default(2)
+  communication       String?        @default("Email, Phone, Corporate VPN")
+  workspaceLocation   String?        @default("Alternate Site / Remote")
+  specialEquipment    String?
+}
+
+model ApprovalHistory {
+  id                  String         @id @default(cuid())
+  biaAssessmentId     String
+  biaAssessment       BiaAssessment  @relation(fields: [biaAssessmentId], references: [id], onDelete: Cascade)
+  stage               String
+  actorName           String
+  action              String
+  comments            String?
+  timestamp           DateTime       @default(now())
+}
+
+model ValidationWorkshop {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  sessionTitle String
+  date        DateTime @default(now())
+  facilitator String
+  participants String?
+  status      String   @default("Scheduled")
+  notes       String?
+  outcomes    String?
+  createdAt   DateTime @default(now())
+}
+
+model Issue {
+  id              String             @id @default(cuid())
+  code            String
+  projectId       String
+  project         Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  unitId          String?
+  unit            OrganizationUnit?  @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  processId       String?
+  process         BusinessProcess?   @relation(fields: [processId], references: [id], onDelete: SetNull)
+  title           String
+  description     String?
+  severity        String             @default("High")
+  owner           String?
+  targetDate      DateTime?
+  status          String             @default("Open")
+  actionPlan      String?
+  consultantNotes String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  projectId   String?
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName    String    @default("System User")
+  userRole    String    @default("CONSULTANT")
+  action      String
+  module      String
+  recordId    String?
+  recordName  String?
+  details     String?
+  ipAddress   String    @default("127.0.0.1")
+  timestamp   DateTime  @default(now())
+}
+
+model Comment {
+  id          String    @id @default(cuid())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName    String
+  targetType  String
+  targetId    String
+  message     String
+  createdAt   DateTime  @default(now())
+}
+
+model ProjectParameter {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  category    String
+  key         String
+  value       String
+  version     String    @default("1.0")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+/// Document-style storage for rich client aggregates that do not have a
+/// dedicated normalized schema (templates, working papers, interviews,
+/// detailed BIA worksheets, system configuration, users, security logs).
+/// The value is JSON serialized as text.
+/// Continuity Risk Register (Pedoman BCM §9.21). One row per identified
+/// continuity risk / threat, with likelihood × impact scoring.
+model RiskAssessment {
+  id              String    @id @default(cuid())
+  code            String
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  category        String?   // Kategori Ancaman (Teknologi/Siber, Infrastruktur, dsb.)
+  riskName        String    // Risiko / Ancaman
+  affectedAsset   String?   // Proses / Aset Terdampak
+  likelihood      Int       @default(3) // 1-5
+  impact          Int       @default(3) // 1-5
+  existingControl String?   // Kontrol Eksisting
+  mitigationPlan  String?   // Rencana Mitigasi Tambahan
+  pic             String?   // PIC
+  targetDate      DateTime? // Target
+  status          String    @default("Open")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+/// BCP Activation & Incident Register (Pedoman BCP §9.B Damage Assessment + §9.C Formulir Aktivasi).
+model BcpActivation {
+  id                String    @id @default(cuid())
+  code              String
+  projectId         String
+  project           Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  disasterType      String    @default("Natural") // Natural / Human / Cyber
+  severityLevel     Int       @default(1)         // 1-4
+  activatedChapter  String?   // Bab BCP yang Diaktifkan
+  workingArrangement String?  @default("WFH")     // WFH / Alternate Site / Kombinasi
+  affectedLocation  String?   // Lokasi Terdampak
+  damageDescription String?   // Deskripsi Kerusakan
+  personnelSafety   String?   // Status Keselamatan Personel
+  affectedSystems   String?   // Sistem/Proses Terdampak (Tier)
+  estRecoveryTime   String?   // Estimasi Waktu Pemulihan
+  activationTime    DateTime? // Waktu Aktivasi
+  authorizedBy      String?   // Diotorisasi oleh
+  status            String    @default("Aktif")   // Aktif / Stand-down / Ditutup
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model AppState {
+  key       String   @id
+  data      String
+  updatedAt DateTime @updatedAt
+}
+

@@ -171,35 +171,21 @@ export const AppShell: React.FC<{ children: React.ReactNode }> = ({ children }) 
             </div>
           </div>
 
-          {/* Right: Security Center, Project Info Pill & Notification Bell */}
+          {/* Right: Security Center (Super Admin only) & Log Out */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Quick Access to Security Center */}
-            <button
-              onClick={() => setSecurityCenterOpen(true)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-sm cursor-pointer ${
-                currentRole === 'SUPER_ADMIN'
-                  ? 'bg-gradient-to-r from-cyan-950/80 to-blue-950/80 border-cyan-500/60 text-cyan-300 hover:border-cyan-400 hover:text-white hover:shadow-cyan-500/20'
-                  : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:text-cyan-300 hover:border-slate-600'
-              }`}
-              title="Pusat Kredensial, Hak Akses & Audit Log Keamanan"
-              aria-label="Security Center"
-            >
-              <ShieldCheck className="w-4 h-4 text-cyan-400" />
-              <span className="hidden sm:inline">Security Center</span>
-              {currentRole === 'SUPER_ADMIN' && (
+            {/* Quick Access to Security Center for SUPER_ADMIN only */}
+            {currentUser?.role === 'SUPER_ADMIN' && (
+              <button
+                onClick={() => setSecurityCenterOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-sm cursor-pointer bg-gradient-to-r from-cyan-950/80 to-blue-950/80 border-cyan-500/60 text-cyan-300 hover:border-cyan-400 hover:text-white hover:shadow-cyan-500/20"
+                title="Pusat Kredensial, Hak Akses & Audit Log Keamanan"
+                aria-label="Security Center"
+              >
+                <ShieldCheck className="w-4 h-4 text-cyan-400" />
+                <span className="hidden sm:inline">Security Center</span>
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-              )}
-            </button>
-
-
-            <button
-              className="p-2.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 relative transition-colors cursor-pointer"
-              title="Notifikasi Sistem"
-              aria-label="Notifikasi Sistem"
-            >
-              <Bell className="w-4.5 h-4.5" />
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 absolute top-2 right-2 ring-2 ring-[#0B1F3A]"></span>
-            </button>
+              </button>
+            )}
 
             {/* Dedicated Log Out Button */}
             <button

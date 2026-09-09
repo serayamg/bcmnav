@@ -165,7 +165,7 @@ export const SecureLoginPortal: React.FC = () => {
 
         {/* STEP 1: CREDENTIALS FORM */}
         {step === 'CREDENTIALS' && (
-          <form onSubmit={handleCredentialsSubmit} className="p-6 sm:p-8 space-y-4">
+          <form onSubmit={handleCredentialsSubmit} className="p-6 sm:p-8 space-y-4" autoComplete="off">
             <div>
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
                 Username / Email Korporat
@@ -178,7 +178,12 @@ export const SecureLoginPortal: React.FC = () => {
                   type="text"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="contoh: admin@bcm-enterprise.id atau superadmin"
+                  placeholder=""
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-lpignore="true"
                   required
                   className="w-full bg-slate-950/70 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#00A9CE] focus:ring-2 focus:ring-[#00A9CE]/20 transition-all"
                 />
@@ -190,9 +195,6 @@ export const SecureLoginPortal: React.FC = () => {
                 <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
                   Kata Sandi (Password)
                 </label>
-                <span className="text-[11px] text-slate-500">
-                  Min. 12 Karakter Terenkripsi
-                </span>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
@@ -202,7 +204,9 @@ export const SecureLoginPortal: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
+                  placeholder=""
+                  autoComplete="new-password"
+                  data-lpignore="true"
                   required
                   className="w-full bg-slate-950/70 border border-slate-700 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#00A9CE] focus:ring-2 focus:ring-[#00A9CE]/20 transition-all font-mono"
                 />
@@ -236,52 +240,12 @@ export const SecureLoginPortal: React.FC = () => {
                 </>
               )}
             </button>
-
-            {/* Quick Demo Credentials */}
-            <div className="pt-3 border-t border-slate-800/80">
-              <div className="text-[11px] text-slate-400 mb-2 font-medium flex items-center justify-between">
-                <span>Pilihan Akun Demo (Klik untuk auto-fill):</span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIdentifier('admin.security@jma-advisory.id');
-                    setPassword('BCM@SECURE2025!');
-                    setErrorMessage(null);
-                  }}
-                  className="text-left p-2 rounded-xl bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 hover:border-cyan-500/40 text-xs transition-all cursor-pointer"
-                >
-                  <div className="font-bold text-cyan-300 flex items-center gap-1">
-                    <Shield className="w-3 h-3 text-cyan-400 shrink-0" />
-                    <span>Super Admin</span>
-                  </div>
-                  <div className="text-[10px] text-slate-400 truncate mt-0.5">admin.security@jma-advisory.id</div>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIdentifier('sarah.wijaya@jma-advisory.id');
-                    setPassword('BCM@SECURE2025!');
-                    setErrorMessage(null);
-                  }}
-                  className="text-left p-2 rounded-xl bg-slate-950/70 hover:bg-slate-800/80 border border-slate-800 hover:border-cyan-500/40 text-xs transition-all cursor-pointer"
-                >
-                  <div className="font-bold text-cyan-300 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3 text-cyan-400 shrink-0" />
-                    <span>Lead Consultant</span>
-                  </div>
-                  <div className="text-[10px] text-slate-400 truncate mt-0.5">sarah.wijaya@jma-advisory.id</div>
-                </button>
-              </div>
-            </div>
           </form>
         )}
 
         {/* STEP 2: MFA CHALLENGE FORM */}
         {step === 'MFA_CHALLENGE' && (
-          <form onSubmit={handleMfaSubmit} className="p-6 sm:p-8 space-y-5 animate-in fade-in duration-200">
+          <form onSubmit={handleMfaSubmit} className="p-6 sm:p-8 space-y-5 animate-in fade-in duration-200" autoComplete="off">
             {/* User Target Card */}
             <div className="p-3.5 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -291,7 +255,7 @@ export const SecureLoginPortal: React.FC = () => {
                 <div>
                   <div className="font-bold text-sm text-white">{targetUserEmail}</div>
                   <div className="text-xs text-cyan-400 flex items-center gap-1 font-semibold">
-                    <span>MFA Wajib: {targetUserMfaType}</span>
+                    <span>MFA: {targetUserMfaType}</span>
                   </div>
                 </div>
               </div>
@@ -310,7 +274,7 @@ export const SecureLoginPortal: React.FC = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  Kode Verifikasi 6-Digit (TOTP / FIDO2)
+                  Kode Verifikasi 6-Digit (MFA)
                 </label>
               </div>
 
@@ -323,27 +287,13 @@ export const SecureLoginPortal: React.FC = () => {
                   maxLength={6}
                   value={mfaCode}
                   onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="123456"
+                  placeholder=""
                   autoFocus
+                  autoComplete="one-time-code"
+                  data-lpignore="true"
                   required
                   className="w-full bg-slate-950/70 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-center text-lg tracking-widest font-mono font-bold text-white placeholder-slate-600 focus:outline-none focus:border-[#00A9CE] focus:ring-2 focus:ring-[#00A9CE]/20 transition-all"
                 />
-              </div>
-
-              <div className="flex items-center justify-between gap-2 mt-2">
-                <p className="text-[11px] text-slate-400 leading-relaxed">
-                  Masukkan kode 6-digit Authenticator atau klik tombol di bawah:
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setMfaCode('123456')}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/40 text-cyan-300 font-mono font-bold transition-all cursor-pointer"
-                >
-                  ⚡ Gunakan Kode Token: 123456
-                </button>
               </div>
             </div>
 
@@ -367,6 +317,7 @@ export const SecureLoginPortal: React.FC = () => {
             </button>
           </form>
         )}
+
 
         {/* Footer Security Seal */}
         <div className="p-4 bg-slate-950/60 border-t border-slate-800 flex items-center justify-center text-[11px] text-slate-500 px-6 sm:px-8">
